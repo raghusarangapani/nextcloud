@@ -1,0 +1,36 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nextcloud-ingressroute-https
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: HostRegexp(`{host:(www\.)?}nextcloud.yourhost.com`)
+      kind: Rule
+      services:
+        - name: nextcloud
+          port: 8080
+          namespace: nextcloud
+          passHostHeader: true
+  tls:
+    secretName: nextcloud-secret
+---
+  apiVersion: traefik.containo.us/v1alpha1
+  kind: IngressRoute
+  metadata:
+    name: nextcloud-ingressroute-http
+  spec:
+    entryPoints:
+      - web
+    routes:
+      - match: HostRegexp(`{host:(www\.)?}nextcloud.yourhost.com`)
+        kind: Rule
+        services:
+          - name: nextcloud
+            port: 8080
+            namespace: nextcloud
+            passHostHeader: true
+        middlewares:
+          - name: redirect
+            namespace: nextcloud
